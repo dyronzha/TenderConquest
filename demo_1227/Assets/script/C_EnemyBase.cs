@@ -12,6 +12,7 @@ public class C_EnemyBase : MonoBehaviour {
     GameObject player;
     CircleCollider2D hit_area;
     bool b_toofar,b_attack = false;
+    int i_mode;
 
     // Use this for initialization
     void Awake()
@@ -22,6 +23,7 @@ public class C_EnemyBase : MonoBehaviour {
         t_attackarea = gameObject.transform.GetChild(1);
         player = GameObject.Find("player");
         hit_area = gameObject.GetComponent<CircleCollider2D>();
+        i_mode = 0;
     }
 
     // Update is called once per frame
@@ -29,6 +31,12 @@ public class C_EnemyBase : MonoBehaviour {
     {
         sight();
         //attackjudgement(ray_seeplayer);
+
+        if (seePlay()) {
+            
+        }
+        else behaviorMode();
+
         if (Input.GetKeyDown(KeyCode.B))
         {
             Debug.Log("change");
@@ -78,7 +86,42 @@ public class C_EnemyBase : MonoBehaviour {
         enemy_body.velocity = walkto_vec3 * 3.0f;
     }
 
+    bool seePlay()
+    {
+        ray_seeplayer = Physics2D.Raycast(transform.position, ((-transform.right) * transform.localScale.x + transform.up * 0.3f), 6.0f, mask);
+        Debug.DrawLine(transform.position, transform.position + (Vector3)((-transform.right * transform.localScale.x) + transform.up * 0.3f) * 6.0f);
+        Vector3 walkto_vec3, record_vec3;
+        float distance = Vector3.Distance(transform.position, respawn_location_vec3);
+        if (distance > 6.0f) b_toofar = true;
+        if (ray_seeplayer)
+        {
+            if (!b_toofar)
+            {
+                walkto_vec3 = new Vector3(ray_seeplayer.transform.position.x - transform.position.x, 0, 0).normalized;
+                if (Mathf.Abs((ray_seeplayer.transform.position.x - transform.position.x)) < 1.8f)
+                {
+                    enemy_animator.Play("EnemyAttack");
+                    Debug.Log("attack");
+                    return (true);
+                }
+                enemy_body.velocity = walkto_vec3 * 3.0f;
+            }
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
+    void behaviorMode() {
+        switch (i_mode) {
+            case 0:
+
+                break;
+            case 1:
+                break;
+        }
+    }
 
     //攻擊範圍
     private bool attackjudgement(RaycastHit2D target)
