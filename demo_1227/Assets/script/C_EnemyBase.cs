@@ -12,7 +12,9 @@ public class C_EnemyBase : MonoBehaviour {
     GameObject player;
     CircleCollider2D hit_area;
     bool b_toofar,b_attack = false;
-    int i_mode;
+    public int i_mode;
+    float f_distance, f_ramble_left, f_ramble_right;
+    public float f_ramble_dis;
 
     // Use this for initialization
     void Awake()
@@ -24,6 +26,8 @@ public class C_EnemyBase : MonoBehaviour {
         player = GameObject.Find("player");
         hit_area = gameObject.GetComponent<CircleCollider2D>();
         i_mode = 0;
+        f_ramble_left = respawn_location_vec3.x - f_ramble_dis;
+        f_ramble_right = respawn_location_vec3.x + f_ramble_right;
     }
 
     // Update is called once per frame
@@ -32,7 +36,7 @@ public class C_EnemyBase : MonoBehaviour {
         sight();
         //attackjudgement(ray_seeplayer);
 
-        if (seePlay()) {
+        if (!seePlay()) {
             
         }
         else behaviorMode();
@@ -51,8 +55,8 @@ public class C_EnemyBase : MonoBehaviour {
         ray_seeplayer = Physics2D.Raycast(transform.position, ((-transform.right) * transform.localScale.x + transform.up * 0.3f), 6.0f,mask);
         Debug.DrawLine(transform.position, transform.position + (Vector3)((-transform.right * transform.localScale.x) + transform.up * 0.3f) * 6.0f);
         Vector3 walkto_vec3, record_vec3;
-        float distance = Vector3.Distance(transform.position, respawn_location_vec3);
-        if (distance > 6.0f) b_toofar = true;
+         f_distance = Vector3.Distance(transform.position, respawn_location_vec3);
+        if (f_distance > 6.0f) b_toofar = true;
         if (ray_seeplayer)
         {
             if (!b_toofar)
@@ -76,7 +80,7 @@ public class C_EnemyBase : MonoBehaviour {
         {
             //walkto_vec3 = Vector3.zero;
             b_toofar = false;
-            if (Mathf.Abs((distance)) < 1.0f)
+            if (Mathf.Abs((f_distance)) < 1.0f)
             {
                 enemy_body.velocity = Vector2.zero;
                 walkto_vec3 = Vector3.zero;
@@ -91,8 +95,8 @@ public class C_EnemyBase : MonoBehaviour {
         ray_seeplayer = Physics2D.Raycast(transform.position, ((-transform.right) * transform.localScale.x + transform.up * 0.3f), 6.0f, mask);
         Debug.DrawLine(transform.position, transform.position + (Vector3)((-transform.right * transform.localScale.x) + transform.up * 0.3f) * 6.0f);
         Vector3 walkto_vec3, record_vec3;
-        float distance = Vector3.Distance(transform.position, respawn_location_vec3);
-        if (distance > 6.0f) b_toofar = true;
+        f_distance = Vector3.Distance(transform.position, respawn_location_vec3);
+        if (f_distance > 6.0f) b_toofar = true;
         if (ray_seeplayer)
         {
             if (!b_toofar)
@@ -105,8 +109,9 @@ public class C_EnemyBase : MonoBehaviour {
                     return (true);
                 }
                 enemy_body.velocity = walkto_vec3 * 3.0f;
+                return true;
             }
-            return true;
+            else return false;
         }
         else {
             return false;
@@ -114,11 +119,28 @@ public class C_EnemyBase : MonoBehaviour {
     }
 
     void behaviorMode() {
+        Vector3 walkto_vec3;
         switch (i_mode) {
             case 0:
-
+                if (Vector2.Distance(respawn_location_vec3, transform.position) > 0.1f)
+                {
+                    walkto_vec3 = (respawn_location_vec3 - transform.position).normalized;
+                }
+                else walkto_vec3 = Vector3.zero;
                 break;
+
             case 1:
+                if (transform.position.x > f_ramble_left)
+                {
+                    walkto_vec3 = new Vector3(transform.position.x - f_ramble_left, 0, 0);
+                }
+                else if (transform.position.x < f_ramble_right)
+                {
+                    walkto_vec3 = new Vector3(f_ramble_right - transform.position.x, 0, 0);
+                }
+                else {
+                    
+                }
                 break;
         }
     }
