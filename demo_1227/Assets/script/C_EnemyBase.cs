@@ -11,7 +11,7 @@ public class C_EnemyBase : MonoBehaviour {
     RaycastHit2D ray_seeplayer;
     GameObject player;
     CircleCollider2D hit_area;
-    bool b_toofar,b_attack = false;
+    bool b_toofar,b_attack, b_to_right = false;
     public int i_mode;
     float f_distance, f_ramble_left, f_ramble_right;
     public float f_ramble_dis;
@@ -25,7 +25,6 @@ public class C_EnemyBase : MonoBehaviour {
         t_attackarea = gameObject.transform.GetChild(1);
         player = GameObject.Find("player");
         hit_area = gameObject.GetComponent<CircleCollider2D>();
-        i_mode = 0;
         f_ramble_left = respawn_location_vec3.x - f_ramble_dis;
         f_ramble_right = respawn_location_vec3.x + f_ramble_right;
     }
@@ -33,13 +32,12 @@ public class C_EnemyBase : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-        sight();
+        //sight();
         //attackjudgement(ray_seeplayer);
 
         if (!seePlay()) {
-            
+            behaviorMode();
         }
-        else behaviorMode();
 
         if (Input.GetKeyDown(KeyCode.B))
         {
@@ -102,13 +100,14 @@ public class C_EnemyBase : MonoBehaviour {
             if (!b_toofar)
             {
                 walkto_vec3 = new Vector3(ray_seeplayer.transform.position.x - transform.position.x, 0, 0).normalized;
+                if (transform.localScale.x * walkto_vec3.x < 0) transform.localScale = new Vector3(transform.localScale.x * -1, 1, 1);
                 if (Mathf.Abs((ray_seeplayer.transform.position.x - transform.position.x)) < 1.8f)
                 {
                     enemy_animator.Play("EnemyAttack");
                     Debug.Log("attack");
                     return (true);
                 }
-                enemy_body.velocity = walkto_vec3 * 3.0f;
+                enemy_body.velocity = walkto_vec3.normalized * 3.0f;
                 return true;
             }
             else return false;
@@ -120,27 +119,40 @@ public class C_EnemyBase : MonoBehaviour {
 
     void behaviorMode() {
         Vector3 walkto_vec3;
+        Vector3 pos_vec3 = transform.position;
         switch (i_mode) {
             case 0:
-                if (Vector2.Distance(respawn_location_vec3, transform.position) > 0.1f)
+                if (Mathf.Abs(respawn_location_vec3.x - pos_vec3.x) > 0.1f)
                 {
-                    walkto_vec3 = (respawn_location_vec3 - transform.position).normalized;
+                    walkto_vec3 = new Vector3(respawn_location_vec3.x - pos_vec3.x,0,0);
                 }
                 else walkto_vec3 = Vector3.zero;
+                enemy_body.velocity = walkto_vec3.normalized * 3.0f;
                 break;
 
             case 1:
-                if (transform.position.x > f_ramble_left)
+                if (pos_vec3.x < f_ramble_left)
                 {
-                    walkto_vec3 = new Vector3(transform.position.x - f_ramble_left, 0, 0);
+                    walkto_vec3 = new Vector3(f_ramble_left - pos_vec3.x , 0, 0);
+                    b_to_right = true;
+                    Debug.Log("more to right" + walkto_vec3);
                 }
-                else if (transform.position.x < f_ramble_right)
+                else if (pos_vec3.x > f_ramble_right)
                 {
-                    walkto_vec3 = new Vector3(f_ramble_right - transform.position.x, 0, 0);
+                    walkto_vec3 = new Vector3(f_ramble_right - pos_vec3.x, 0, 0);
+                    b_to_right = false;
+                    Debug.Log("more to left" + walkto_vec3);
                 }
                 else {
-                    
+                    if (b_to_right) {
+                        walkto_vec3 = new Vector3(f_ramble_right - pos_vec3.x, 0, 0);
+                        Debug.Log("to right" + walkto_vec3);
+                    }
+                    else walkto_vec3 = new Vector3(f_ramble_left - pos_vec3.x, 0, 0);
+                    Debug.Log("to left" + walkto_vec3);
                 }
+                enemy_body.velocity = walkto_vec3.normalized * 3.0f;
+                Debug.Log("speed" + enemy_body.velocity);
                 break;
         }
     }
