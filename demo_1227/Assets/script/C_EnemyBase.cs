@@ -7,15 +7,15 @@ public class C_EnemyBase : MonoBehaviour {
     public LayerMask mask;
     Vector3 respawn_location_vec3;
     Animator enemy_animator;
-    Transform t_attackarea;
-    RaycastHit2D ray_seeplayer;
+    Transform t_attackarea, t_detect;
+    RaycastHit2D ray_seeplayer,ray_detect;
     GameObject player;
     CircleCollider2D hit_area;
     bool b_toofar,b_attack, b_to_right = false;
     public int i_mode;
-    float f_distance, f_ramble_left, f_ramble_right;
-    public float f_ramble_dis, f_speed, f_sight_dis;
-    bool seeit;
+    float f_distance, f_ramble_left, f_ramble_right, f_ramble_wait;
+    public float f_ramble_dis, f_speed, f_sight_dis,f_face_way;
+    bool b_see_it,b_ramble_return;
     // Use this for initialization
     void Awake()
     {
@@ -23,11 +23,14 @@ public class C_EnemyBase : MonoBehaviour {
         respawn_location_vec3 = transform.position;
         enemy_animator = gameObject.GetComponent<Animator>();
         t_attackarea = gameObject.transform.GetChild(1);
+        t_detect = gameObject.transform.GetChild(2);
         player = GameObject.Find("player");
         hit_area = gameObject.GetComponent<CircleCollider2D>();
         f_ramble_left = respawn_location_vec3.x - f_ramble_dis;
         f_ramble_right = respawn_location_vec3.x + f_ramble_dis;
-        seeit = false;
+        b_see_it = b_ramble_return = false;
+        f_face_way = transform.localScale.x;
+        f_ramble_wait = 0.0f;
     }
 
     // Update is called once per frame
@@ -41,37 +44,38 @@ public class C_EnemyBase : MonoBehaviour {
     //追逐視野內玩家
     bool seePlay()
     {
-        if (!seeit) seeit = ray_seeplayer = Physics2D.Raycast(transform.position, (new Vector3(-1 * transform.localScale.x, 0, 0) + transform.up * 0.3f), 6.0f, mask);
+        if (!b_see_it) b_see_it = ray_seeplayer = Physics2D.Raycast(transform.position, (new Vector3(-1 * transform.localScale.x, 0, 0) + transform.up * 0.3f), 6.0f, mask);
         Debug.DrawLine(transform.position, transform.position + (new Vector3(-1 * transform.localScale.x, 0, 0) + transform.up*0.3f).normalized * 6.0f);
         Vector3 walkto_vec3;
+        ray_detect = Physics2D.Linecast(transform.position, t_detect.transform.position, 1 << LayerMask.NameToLayer("ground"));
         f_distance = Mathf.Abs(transform.position.x - respawn_location_vec3.x) ;
         if (f_distance > f_sight_dis) b_toofar = true;
-        if (seeit)
+        else b_toofar = false;
+        if (b_see_it && ray_detect)
         {
             if (!b_toofar)
             {
                 walkto_vec3 = new Vector3(ray_seeplayer.transform.position.x - transform.position.x, 0, 0);
                 transform.localScale = new Vector3(1.0f * Mathf.Sign(transform.position.x - ray_seeplayer.transform.position.x), 1, 1);
-                if (Mathf.Abs((ray_seeplayer.transform.position.x - transform.position.x)) < 1.8f)
+                if (Mathf.Abs((ray_seeplayer.transform.position.x - transform.position.x)) < 1.5f)
                 {
                     enemy_body.velocity = new Vector3(0, 0, 0);
                     enemy_animator.Play("EnemyAttack");
                     Debug.Log("attack");
                     return (true);
                 }
-                enemy_body.velocity = walkto_vec3.normalized * f_speed*1.4f;
+                enemy_body.velocity = new Vector3(walkto_vec3.normalized.x * f_speed*1.4f, enemy_body.velocity.y,0);
                 Debug.Log(transform.localScale + "yux" + walkto_vec3.normalized * f_speed * 1.4f);
                 return true;
             }
             else {
                 transform.localScale = new Vector3(1.0f *Mathf.Sign(transform.position.x - respawn_location_vec3.x) ,1,1);
-                //seeit = false;
-                Debug.Log("fuck");
+                b_see_it = false;
                 return false;
             } 
         }
         else {
-            seeit = false;
+            b_see_it = false;
             return false;
         }
     }
@@ -81,39 +85,69 @@ public class C_EnemyBase : MonoBehaviour {
         Vector3 pos_vec3 = transform.position;
         switch (i_mode) {
             case 0:
-                if (Mathf.Abs(respawn_location_vec3.x - pos_vec3.x) > 0.1f)
+                if (Mathf.Abs(respawn_location_vec3.x - pos_vec3.x) >0.5f)
                 {
-                    walkto_vec3 = new Vector3(respawn_location_vec3.x - pos_vec3.x, 0, 0);
+                    if (!Wait(ref f_ramble_wait, 1.2f)) {
+                        enemy_body.velocity = new Vector3(0, enemy_body.velocity.y, 0);
+                        return;
+                    } 
+                    transform.localScale = new Vector3(Mathf.Sign(pos_vec3.x - respawn_location_vec3.x) ,1,1);
+                    walkto_vec3 = new Vector3(f_face_way, 0, 0);
                 }
                 else {
-                    transform.localScale = new Vector3(-transform.localScale.x, 1, 1);
+                    f_ramble_wait = 0.0f;
+                    transform.localScale = new Vector3(f_face_way, 1, 1);
                     walkto_vec3 = Vector3.zero;
                 } 
-                enemy_body.velocity = walkto_vec3.normalized * f_speed;
+                enemy_body.velocity = new Vector3(walkto_vec3.normalized.x * f_speed, enemy_body.velocity.y, 0);
                 break;
 
             case 1:
                 if (pos_vec3.x < f_ramble_left)
                 {
+                    if (!(Wait(ref f_ramble_wait, 1.5f))) {
+                        enemy_body.velocity = new Vector3(0,enemy_body.velocity.y,0);
+                        return;
+                    }
+                    b_ramble_return = true;
                     transform.localScale = new Vector3(-1, 1, 1);
                     walkto_vec3 = new Vector3(1 , 0, 0);
                     b_to_right = true;
                 }
                 else if (pos_vec3.x > f_ramble_right)
                 {
+                    if ((!Wait(ref f_ramble_wait, 1.5f))) {
+                        enemy_body.velocity = new Vector3(0,enemy_body.velocity.y,0);
+                        return;
+                    }
                     transform.localScale = new Vector3(1, 1, 1);
                     walkto_vec3 = new Vector3(-1, 0, 0);
                     b_to_right = false;
                 }
                 else {
+                    f_ramble_wait = 00f;
                     if (b_to_right) {
                         walkto_vec3 = new Vector3(1, 0, 0);
                     }
                     else walkto_vec3 = new Vector3(-1, 0, 0);
                 }
-                enemy_body.velocity = walkto_vec3.normalized * f_speed;
+                enemy_body.velocity = new Vector3(walkto_vec3.normalized.x * f_speed, enemy_body.velocity.y, 0);
                 break;
         }
+    }
+
+    bool Wait(ref float f_current_time, float f_total_time ) {
+        if ( f_current_time < f_total_time)
+        {
+            f_current_time += Time.deltaTime;
+            Debug.Log("Wait" + f_current_time);
+            return false;
+        }
+        else {
+            Debug.Log("done" + f_current_time);
+            return true;
+        } 
+        
     }
 
     //攻擊範圍
