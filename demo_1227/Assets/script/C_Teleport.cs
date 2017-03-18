@@ -16,7 +16,6 @@ public class C_Teleport : MonoBehaviour {
     void Start () {
         temp = null;
         player = this.GetComponent<C_Player>();
-        Debug.Log(player.direction);
         camera = GameObject.Find("Main Camera");
         spine_ani = transform.GetChild(0);
         animator = this.gameObject.GetComponent<Animator>();
