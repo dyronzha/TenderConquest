@@ -59,6 +59,7 @@ public class C_Player : MonoBehaviour {
     bool b_airmove = false;
     public LayerMask mask_layer;
     public bool direction = true; //面相右邊為true 左邊false
+    public float f_gravity;
 
     //重生變數
     public bool b_die = false;
@@ -122,6 +123,7 @@ public class C_Player : MonoBehaviour {
             transform.position = last_position_vec3;
             PlayerRespawn();//重生
         }
+        player_rig.velocity = new Vector3(player_rig.velocity.x, player_rig.velocity.y-f_gravity*Time.deltaTime, 0);
     }
 
     void Update()
@@ -198,14 +200,16 @@ public class C_Player : MonoBehaviour {
             {
                 transform.localScale = new Vector3(0.7f, -0.7f, 1f);
                 transform.position = between_virtuall_vec3;
-                player_rig.gravityScale = -1.5f;
+                //player_rig.gravityScale = -1.5f;
+                f_gravity *= -1;
                 b_magic = false;
                 b_upside = true;
             }
             else if (b_magic && b_isground) {
                 transform.localScale = new Vector3(0.7f, 0.7f, 1f);
                 transform.position = between_virtuall_vec3;
-                player_rig.gravityScale = 1.5f;
+                // player_rig.gravityScale = 1.5f;
+                f_gravity *= -1;
                 b_magic = false;
                 b_upside = false;
             }
@@ -411,11 +415,11 @@ public class C_Player : MonoBehaviour {
             b_magic = false;
             b_upside = false;
             b_use_skill = false;
-            player_rig.gravityScale = 1.5f;
             transform.localScale = new Vector3(0.7f,0.7f,1);
             b_die = false;
             f_dietime = 0;
             O_camera.SendMessage("ResetPos");
+            if (f_gravity < 0) f_gravity *= -1;
         }
     }
 
