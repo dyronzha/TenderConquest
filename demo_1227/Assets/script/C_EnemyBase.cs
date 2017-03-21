@@ -12,9 +12,9 @@ public class C_EnemyBase : MonoBehaviour {
     GameObject player;
     CircleCollider2D hit_area;
     bool b_toofar,b_attack, b_to_right = false;
-    public int i_mode;
-    float f_distance, f_ramble_left, f_ramble_right, f_ramble_wait;
-    public float f_ramble_dis, f_speed, f_sight_dis,f_face_way;
+    public int i_HP,i_mode;
+    float f_distance, f_ramble_left, f_ramble_right, f_ramble_wait, f_face_way;
+    public float f_ramble_dis, f_speed,f_trace_dis,f_sight_dis;
     bool b_see_it,b_ramble_return;
     // Use this for initialization
     void Awake()
@@ -44,12 +44,12 @@ public class C_EnemyBase : MonoBehaviour {
     //追逐視野內玩家
     bool seePlay()
     {
-        if (!b_see_it) b_see_it = ray_seeplayer = Physics2D.Raycast(transform.position, (new Vector3(-1 * transform.localScale.x, 0, 0) + transform.up * 0.3f), 6.0f, mask);
-        Debug.DrawLine(transform.position, transform.position + (new Vector3(-1 * transform.localScale.x, 0, 0) + transform.up*0.3f).normalized * 6.0f);
+        if (!b_see_it) b_see_it = ray_seeplayer = Physics2D.Raycast(transform.position, (new Vector3(-1 * transform.localScale.x, 0, 0) + transform.up * 0.3f),f_sight_dis, mask);
+        Debug.DrawLine(transform.position, transform.position + (new Vector3(-1 * transform.localScale.x, 0, 0) + transform.up*0.3f).normalized * f_sight_dis);
         Vector3 walkto_vec3;
         ray_detect = Physics2D.Linecast(transform.position, t_detect.transform.position, 1 << LayerMask.NameToLayer("ground"));
         f_distance = Mathf.Abs(transform.position.x - respawn_location_vec3.x) ;
-        if (f_distance > f_sight_dis) b_toofar = true;
+        if (f_distance >f_trace_dis) b_toofar = true;
         else b_toofar = false;
         if (b_see_it && ray_detect)
         {
@@ -61,11 +61,9 @@ public class C_EnemyBase : MonoBehaviour {
                 {
                     enemy_body.velocity = new Vector3(0, 0, 0);
                     enemy_animator.Play("EnemyAttack");
-                    Debug.Log("attack");
                     return (true);
                 }
                 enemy_body.velocity = new Vector3(walkto_vec3.normalized.x * f_speed*1.4f, enemy_body.velocity.y,0);
-                Debug.Log(transform.localScale + "yux" + walkto_vec3.normalized * f_speed * 1.4f);
                 return true;
             }
             else {
@@ -150,43 +148,14 @@ public class C_EnemyBase : MonoBehaviour {
         
     }
 
-    //攻擊範圍
-    private bool attackjudgement(RaycastHit2D target)
-    {
-        if (!target) return false;
-        float top, right, bottom, left;
-        Vector3 right_t, right_b, left_t, left_b, playerpos;
-        right_t = t_attackarea.transform.position + 3.5f * transform.up + 1.0f * transform.right;
-        right_b = t_attackarea.transform.position + -0.3f * transform.up + 1.0f * transform.right;
-        left_t = t_attackarea.transform.position + 3.5f * transform.up + -0.7f * transform.right;
-        left_b = t_attackarea.transform.position + -0.3f * transform.up + -0.7f * transform.right;
-        playerpos = target.transform.position;
-        Debug.DrawLine(right_t, left_t, Color.white);
-        Debug.DrawLine(right_t, right_b, Color.white);
-        Debug.DrawLine(left_t, left_b, Color.white);
-        Debug.DrawLine(right_b, left_b, Color.white);
-        top = multiarea(playerpos, right_t, left_t);
-        right = multiarea(playerpos, right_t, right_b);
-        bottom = multiarea(playerpos, right_b, left_b);
-        left = multiarea(playerpos, left_t, left_b);
-        if (top * bottom <= 0 && right * left <= 0)
-        {
-            return true;
-        }
-        else
-        {
-            Debug.Log("enter but");
-            return false;
-        }
-    }
-
     public void Attackarea(){
         hit_area.enabled = true;
-        if (b_attack)
-        {
-            Debug.Log("success");
-        }
-        else Debug.Log("miss");
+        b_attack = true;
+    }
+
+    public void GetHurt() {
+        i_HP--;
+
     }
 
     //四邊形面積
@@ -202,10 +171,28 @@ public class C_EnemyBase : MonoBehaviour {
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Player") {
-            b_attack = true;
+        Debug.Log("hit");
+        if (collision.tag == "Player" && b_attack)
+        {
+            b_attack = false;
+            Debug.Log("success");
+            hit_area.enabled = false;
+            
+            collision.gameObject.SendMessage("GetHurt");
         }
     }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+       
+        //if (collision.tag == "Player" && b_attack)
+        //{
+        //    b_attack = false;
+        //    Debug.Log("success");
+        //    collision.gameObject.SendMessage("GetHurt");
+        //}
+    }
+
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.tag == "Player")
