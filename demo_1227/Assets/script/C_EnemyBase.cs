@@ -14,7 +14,7 @@ public class C_EnemyBase : MonoBehaviour {
     bool b_toofar,b_attack, b_to_right = false;
     public int i_HP,i_mode;
     float f_distance, f_ramble_left, f_ramble_right, f_ramble_wait, f_face_way;
-    public float f_ramble_dis, f_speed,f_trace_dis,f_sight_dis;
+    public float f_ramble_dis, f_speed,f_trace_dis,f_sight_dis,f_player_dis;
     bool b_see_it,b_ramble_return;
     // Use this for initialization
     void Awake()
@@ -53,7 +53,8 @@ public class C_EnemyBase : MonoBehaviour {
         else b_toofar = false;
         if (b_see_it && ray_detect)
         {
-            if (!b_toofar)
+            f_player_dis = Vector2.Distance(transform.position, ray_seeplayer.transform.position);
+            if (!b_toofar && f_player_dis<5.0f)
             {
                 walkto_vec3 = new Vector3(ray_seeplayer.transform.position.x - transform.position.x, 0, 0);
                 transform.localScale = new Vector3(1.0f * Mathf.Sign(transform.position.x - ray_seeplayer.transform.position.x), 1, 1);
