@@ -46,6 +46,7 @@ public class C_Player : MonoBehaviour {
     protected C_UIHP HP_ui;
     public string s_name = "player";
     public Transform player_tra;
+    private bool b_hurting;
     
 
     //玩家運動變數
@@ -98,6 +99,7 @@ public class C_Player : MonoBehaviour {
         AOE_col.gameObject.SetActive(false);
         b_AOE_has = false;
         transform.GetChild(0).gameObject.SetActive(false);
+        b_hurting = false;
     }
 
     void Start()
@@ -112,7 +114,7 @@ public class C_Player : MonoBehaviour {
     void FixedUpdate()
     {
 
-        if (!b_die)  //沒死
+        if (!b_die && !b_hurting)  //沒死
         {
             IsDie();    //判斷是生是死
             Move();  //基本移動
@@ -128,6 +130,7 @@ public class C_Player : MonoBehaviour {
 
     void Update()
     {
+        if (b_hurting) return;
         AOE_skill();
         TeleportToAni(); //上下瞬移
         b_isground = (Physics2D.Linecast(transform.position, t_ground_check.position, 1 << LayerMask.NameToLayer("ground"))) ||
@@ -443,6 +446,7 @@ public class C_Player : MonoBehaviour {
         transform.GetChild(6).gameObject.SetActive(false);
         player_spine_animator.Play("hit2");
         i_hp --;
+        b_hurting = true;
       //  HP_ui.PresentHp(ref i_hp);
         Debug.Log("hurt");
     }
