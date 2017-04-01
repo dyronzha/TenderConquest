@@ -17,7 +17,7 @@ public class C_Ice : MonoBehaviour {
     }
 
     void OnTriggerEnter2D(Collider2D collider) {
-        player.InvokeRepeating("GetHurt",0.0f, 2.0f);
+        player.SendMessage("GetHurt",collider.transform.localScale.x);
     }
     private void OnTriggerExit2D(Collider2D collision)
     {

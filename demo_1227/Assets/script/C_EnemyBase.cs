@@ -13,7 +13,7 @@ public class C_EnemyBase : MonoBehaviour {
     CircleCollider2D hit_area;
     bool b_toofar,b_attack, b_to_right = false;
     public int i_HP,i_mode;
-    float f_distance, f_ramble_left, f_ramble_right, f_ramble_wait, f_face_way;
+    float f_distance, f_ramble_left, f_ramble_right, f_ramble_wait, f_face_way,f_atk_blank;
     public float f_ramble_dis, f_speed,f_trace_dis,f_sight_dis,f_player_dis;
     bool b_see_it,b_ramble_return;
     // Use this for initialization
@@ -30,12 +30,13 @@ public class C_EnemyBase : MonoBehaviour {
         f_ramble_right = respawn_location_vec3.x + f_ramble_dis;
         b_see_it = b_ramble_return = false;
         f_face_way = transform.localScale.x;
-        f_ramble_wait = 0.0f;
+        f_ramble_wait = f_atk_blank =  0.0f;
     }
 
     // Update is called once per frame
     void Update()
     {
+        //沒看到玩家進入待機
         if (!seePlay()) {
             behaviorMode();
         }
@@ -51,6 +52,11 @@ public class C_EnemyBase : MonoBehaviour {
         f_distance = Mathf.Abs(transform.position.x - respawn_location_vec3.x) ;
         if (f_distance >f_trace_dis) b_toofar = true;
         else b_toofar = false;
+        if (b_attack && !Wait(ref f_atk_blank, 1.0f)) return true;
+        else {
+            f_atk_blank = 0;
+            b_attack = false;
+        }
         if (b_see_it && ray_detect)
         {
             f_player_dis = Vector2.Distance(transform.position, ray_seeplayer.transform.position);
@@ -139,7 +145,6 @@ public class C_EnemyBase : MonoBehaviour {
         if ( f_current_time < f_total_time)
         {
             f_current_time += Time.deltaTime;
-            Debug.Log("Wait" + f_current_time);
             return false;
         }
         else {
@@ -156,7 +161,6 @@ public class C_EnemyBase : MonoBehaviour {
 
     public void GetHurt() {
         i_HP--;
-
     }
 
     //四邊形面積
@@ -175,23 +179,15 @@ public class C_EnemyBase : MonoBehaviour {
         Debug.Log("hit");
         if (collision.tag == "Player" && b_attack)
         {
-            b_attack = false;
             Debug.Log("success");
             hit_area.enabled = false;
-            
-            collision.gameObject.SendMessage("GetHurt");
+            collision.gameObject.SendMessage("GetHurt",transform.localScale.x);
         }
     }
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-       
-        //if (collision.tag == "Player" && b_attack)
-        //{
-        //    b_attack = false;
-        //    Debug.Log("success");
-        //    collision.gameObject.SendMessage("GetHurt");
-        //}
+
     }
 
     private void OnTriggerExit2D(Collider2D collision)

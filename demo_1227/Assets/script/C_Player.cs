@@ -47,6 +47,7 @@ public class C_Player : MonoBehaviour {
     public string s_name = "player";
     public Transform player_tra;
     private bool b_hurting;
+    private float f_hurting_time,f_hurt_dir;
     
 
     //玩家運動變數
@@ -100,6 +101,7 @@ public class C_Player : MonoBehaviour {
         b_AOE_has = false;
         transform.GetChild(0).gameObject.SetActive(false);
         b_hurting = false;
+        f_hurting_time = 0;
     }
 
     void Start()
@@ -113,8 +115,9 @@ public class C_Player : MonoBehaviour {
     // Update is called once per frame
     void FixedUpdate()
     {
-
-        if (!b_die && !b_hurting)  //沒死
+        player_rig.velocity = new Vector2(player_rig.velocity.x, player_rig.velocity.y - f_gravity * Time.deltaTime);
+        if (b_hurting) return;
+        if (!b_die)  //沒死
         {
             IsDie();    //判斷是生是死
             Move();  //基本移動
@@ -125,12 +128,14 @@ public class C_Player : MonoBehaviour {
             transform.position = last_position_vec3;
             PlayerRespawn();//重生
         }
-        player_rig.velocity = new Vector3(player_rig.velocity.x, player_rig.velocity.y-f_gravity*Time.deltaTime, 0);
     }
 
     void Update()
     {
-        if (b_hurting) return;
+        if (b_hurting) {
+            HurtTime();
+            return;
+        } 
         AOE_skill();
         TeleportToAni(); //上下瞬移
         b_isground = (Physics2D.Linecast(transform.position, t_ground_check.position, 1 << LayerMask.NameToLayer("ground"))) ||
@@ -155,6 +160,7 @@ public class C_Player : MonoBehaviour {
         }
         else direction = false;
     }
+
 
     void TeleportToAni() {
         RaycastHit2D hit_cilling_ray = Physics2D.Raycast(transform.position, Vector2.up, 5.0f, mask_layer);
@@ -201,7 +207,7 @@ public class C_Player : MonoBehaviour {
             skill_time = 0.0f;
             if (b_magic && b_isground && !b_upside)
             {
-                transform.localScale = new Vector3(0.7f, -0.7f, 1f);
+                transform.localScale = new Vector3(1.0f, -1.0f, 1f);
                 transform.position = between_virtuall_vec3;
                 //player_rig.gravityScale = -1.5f;
                 f_gravity *= -1;
@@ -209,7 +215,7 @@ public class C_Player : MonoBehaviour {
                 b_upside = true;
             }
             else if (b_magic && b_isground) {
-                transform.localScale = new Vector3(0.7f, 0.7f, 1f);
+                transform.localScale = new Vector3(1.0f, 1.0f, 1f);
                 transform.position = between_virtuall_vec3;
                 // player_rig.gravityScale = 1.5f;
                 f_gravity *= -1;
@@ -228,18 +234,6 @@ public class C_Player : MonoBehaviour {
 
     void Teleport()
     {
-        //顛倒判定射線
-        //RaycastHit2D hit_cilling_ray = Physics2D.Raycast(transform.position, Vector2.up, 8.5f, mask_layer);
-       // RaycastHit2D hit_ground_ray = Physics2D.Raycast(transform.position, Vector2.up, -8.5f, mask_layer);
-        //Debug.DrawLine(transform.position, transform.position + (Vector3)Vector2.up * 8.5f);
-        //Debug.DrawLine(transform.position, transform.position + (Vector3)Vector2.up * -8.5f, Color.red);
-        //碰到天花板並正向
-        //if (hit_cilling_ray && !b_upside)
-        //{
-           // //紀錄鏡子和虛像與玩家的距離
-          //  between_cilling_vec3 = new Vector3(transform.position.x, (transform.position.y + hit_cilling_ray.point.y) / 2+0.5f , transform.position.z);
-          //  between_virtuall_vec3 = new Vector3(transform.position.x, hit_cilling_ray.point.y - 0.5f, transform.position.z);
-
            // //按鍵後產生鏡子和虛像，並紀錄用過技能
            if ( !b_magic && b_isground&& !b_upside)
           {
@@ -248,46 +242,12 @@ public class C_Player : MonoBehaviour {
                 b_magic = true;
             }
 
-            //放開鍵瞬間移動，改變重力方向，紀錄為顛倒，技能初始
-            //else if (Input.GetKeyUp(KeyCode.K) && b_magic && b_isground)
-            //{
-            //    transform.localScale = new Vector3(0.7f, -0.7f, 1f);
-            //    transform.position = between_virtuall_vec3;
-            //    player_rig.gravityScale = -3.0f;
-            //    b_magic = false;
-            //    b_upside = true;
-            //}
-       // }
-
-        //顛倒後
-        // if (hit_ground_ray && b_upside)
-        //{
-        //    between_cilling_vec3 = new Vector3(transform.position.x, (transform.position.y + hit_ground_ray.point.y) / 2-0.5f , transform.position.z);
-      //      between_virtuall_vec3 = new Vector3(transform.position.x, hit_ground_ray.point.y + 0.5f, transform.position.z);
-
             if ( !b_magic && b_isground&& b_upside)
             {
                 O_tempmirror = Instantiate(O_mirror, between_cilling_vec3, Quaternion.identity) as GameObject;
                 O_tempvirtuall = Instantiate(O_virtualplayer, between_virtuall_vec3, Quaternion.identity) as GameObject;
                 b_magic = true;
             }
-
-            //瞬間移動
-            //else if (Input.GetKeyUp(KeyCode.K) && b_magic && b_isground)
-            //{
-            //    transform.localScale = new Vector3(0.7f, 0.7f, 1f);
-            //    transform.position = between_virtuall_vec3;
-            //    player_rig.gravityScale = 3.0f;
-            //    b_magic = false;
-            //    b_upside = false;
-            //}
-      //  }
-        //if ((!hit_cilling_ray || !hit_ground_ray) && b_magic)
-        //{
-        //    Destroy(O_tempmirror, 0f);
-        //    Destroy(O_tempvirtuall, 0f);
-        //    b_magic = false;
-        //}
     }
 
     //跳
@@ -304,7 +264,8 @@ public class C_Player : MonoBehaviour {
             b_jump = false;
         }
     }
-
+    
+    //移動
     void Move()
     {
         //空中撞到牆速度為0
@@ -315,7 +276,7 @@ public class C_Player : MonoBehaviour {
         {
             if (Input.GetKey(KeyCode.A))
             {
-                transform.localScale = new Vector3(-0.7f, 0.7f, 0.7f);//轉向用
+                transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);//轉向用
 
                 player_rig.velocity = new Vector2(-f_speed, player_rig.velocity.y); //速度等於speed
                 transform.GetChild(0).gameObject.SetActive(false);
@@ -325,7 +286,7 @@ public class C_Player : MonoBehaviour {
             }
             else if (Input.GetKey(KeyCode.D))
             {
-                transform.localScale = new Vector3(0.7f, 0.7f, 1f);//轉向用
+                transform.localScale = new Vector3(1.0f, 1.0f, 1f);//轉向用
                 player_rig.velocity = new Vector2(f_speed, player_rig.velocity.y);
                 transform.GetChild(0).gameObject.SetActive(false);
                 transform.GetChild(6).gameObject.SetActive(true);
@@ -337,7 +298,7 @@ public class C_Player : MonoBehaviour {
         {
             if (Input.GetKey(KeyCode.A))
             {
-                transform.localScale = new Vector3(-0.7f, -0.7f, 0.7f);//轉向用
+                transform.localScale = new Vector3(-1.0f, -1.0f, 1.0f);//轉向用
                 player_rig.velocity = new Vector2(-f_speed, player_rig.velocity.y);
                 transform.GetChild(0).gameObject.SetActive(false);
                 transform.GetChild(6).gameObject.SetActive(true);
@@ -346,7 +307,7 @@ public class C_Player : MonoBehaviour {
             }
             else if (Input.GetKey(KeyCode.D))
             {
-                transform.localScale = new Vector3(0.7f, -0.7f, 0.7f);//轉向用
+                transform.localScale = new Vector3(1.0f, -1.0f, 1.0f);//轉向用
                 player_rig.velocity = new Vector2(f_speed, player_rig.velocity.y);
                 transform.GetChild(0).gameObject.SetActive(false);
                 transform.GetChild(6).gameObject.SetActive(true);
@@ -388,22 +349,16 @@ public class C_Player : MonoBehaviour {
     {
         GameObject vbullet;
         Rigidbody2D vrigidbody;
-      
         //算向量差與x軸的夾角的餘角(因為是讓子彈原是90度開始轉)
             vbullet = Instantiate(O_bullet, transform.position + new Vector3(transform.lossyScale.x, 0.7f, 0), Quaternion.Euler(0f, 0f, 0f)) as GameObject;
             vrigidbody = vbullet.GetComponent<Rigidbody2D>();
-            vrigidbody.velocity = new Vector3(normalied.x * 25, normalied.y * 25, 0.0f);
+            vrigidbody.velocity = new Vector2(normalied.x * 25, normalied.y * 25);
             vbullet.transform.rotation = Quaternion.Euler(0f, 0f, angle);
             i_hp--;
             HP_ui.PresentHp(ref i_hp);
             f_shoot = 0;
         shoot_ani_time = 0f;
     }
-
-
-    
-
-
 
     //腳色重生
     void PlayerRespawn()
@@ -418,7 +373,7 @@ public class C_Player : MonoBehaviour {
             b_magic = false;
             b_upside = false;
             b_use_skill = false;
-            transform.localScale = new Vector3(0.7f,0.7f,1);
+            transform.localScale = new Vector3(1.0f,1.0f,1);
             b_die = false;
             f_dietime = 0;
             O_camera.SendMessage("ResetPos");
@@ -440,15 +395,27 @@ public class C_Player : MonoBehaviour {
     }
 
     //受傷
-    public void GetHurt()
+    public void GetHurt(float hurt_dir)
     {
         transform.GetChild(0).gameObject.SetActive(true);
         transform.GetChild(6).gameObject.SetActive(false);
         player_spine_animator.Play("hit2");
         i_hp --;
         b_hurting = true;
-      //  HP_ui.PresentHp(ref i_hp);
+        f_hurt_dir = hurt_dir;
         Debug.Log("hurt");
+        player_rig.velocity = new Vector2(-5.0f*hurt_dir,10.0f);
+    }
+    //受擊傷害時間
+    public void HurtTime() {
+        f_hurting_time += Time.deltaTime;
+        player_rig.velocity += new Vector2(10.0f *f_hurt_dir* Time.deltaTime, -20.0f*Time.deltaTime);
+        if (f_hurting_time > 0.5f) {
+            b_hurting = false;
+            f_hurting_time = 0.0f;
+            player_rig.velocity = Vector2.zero;
+        } 
+        
     }
 
     //判斷掉落死亡
