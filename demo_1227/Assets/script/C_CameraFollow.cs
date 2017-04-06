@@ -154,7 +154,7 @@ public class C_CameraFollow : MonoBehaviour {
         if (!playerclass.b_isground)  //玩家離地
         {
             //玩家y軸超出範圍
-            if (playertop.y > right_border.position.y && transform.position.y < playertop.y + BtwTop)
+            if (playertop.y > right_border.position.y && transform.position.y < playertop.y + BtwTop) //前面是判斷人物去推邊界，後面是不要讓超過邊界往回調也跟著移動
             {
                 //讓攝影機移到目前玩家位置加一開始紀錄的向量差
                 transform.position = new Vector3(transform.position.x, playertop.y + BtwTop, transform.position.z);
