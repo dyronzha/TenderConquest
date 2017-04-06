@@ -36,7 +36,6 @@ public class C_Player : MonoBehaviour {
     Rigidbody2D player_rig = null;
     Animator player_spine_animator = null;
     Animator player_animator = null;
-    Animator player_spine_animator2 = null;
     public bool b_isground = true;
     private Transform t_ground_check,t_ground_check2;
     private Transform t_pic;
@@ -52,8 +51,8 @@ public class C_Player : MonoBehaviour {
 
     //玩家運動變數
     private float f_speed = 0.0f;
-    private bool b_jump = false;
-    private float f_jump_speed = 0.0f;
+    private bool b_jump,b_jump_end = false;
+    private float f_jump_speed, f_jump_time = 0.0f;
     Vector3 last_position_vec3;
     Vector2 jump_vec2;
     public Vector3 between_cilling_vec3;
@@ -86,7 +85,6 @@ public class C_Player : MonoBehaviour {
         t_pic = transform.Find("pic");
         player_spine_animator = transform.GetChild(0).GetComponent<Animator>();
         player_animator = gameObject.GetComponent<Animator>();
-        player_spine_animator2 = transform.GetChild(6).GetComponent<Animator>();
         player_tra = gameObject.GetComponent<Transform>();
         jump_vec2 = new Vector2(0, f_jump_speed);
         player_coll = GetComponent<Collider2D>();
@@ -99,7 +97,6 @@ public class C_Player : MonoBehaviour {
         AOE_col = transform.GetChild(3);
         AOE_col.gameObject.SetActive(false);
         b_AOE_has = false;
-        transform.GetChild(0).gameObject.SetActive(false);
         b_hurting = false;
         f_hurting_time = 0;
     }
@@ -138,16 +135,21 @@ public class C_Player : MonoBehaviour {
         } 
         AOE_skill();
         TeleportToAni(); //上下瞬移
+        //判斷在地上
         b_isground = (Physics2D.Linecast(transform.position, t_ground_check.position, 1 << LayerMask.NameToLayer("ground"))) ||
             (Physics2D.Linecast(transform.position, t_ground_check2.position, 1 << LayerMask.NameToLayer("ground")));
-        //判斷在地上
+        player_spine_animator.SetBool("isground", b_isground);
+
         if (!b_die)  //沒死
         {
             if (Input.GetKey(KeyCode.W) && b_isground)//&& !b_magic
             {
                 b_jump = true;
+                b_jump_end = false;
+                player_spine_animator.SetBool("jump", b_jump);
                 JumpAct();
             }
+            if (!b_jump_end) JumpEndTime();
             //射擊
             ShootAni();
             //射擊間格時間
@@ -181,8 +183,6 @@ public class C_Player : MonoBehaviour {
             if (Input.GetKeyDown(KeyCode.E))
         {
             if (!skill_ani_use) {
-                transform.GetChild(0).gameObject.SetActive(true);
-                transform.GetChild(6).gameObject.SetActive(false);
                 player_spine_animator.Play("mirror");
             } 
             skill_ani_use = true;
@@ -201,8 +201,6 @@ public class C_Player : MonoBehaviour {
       
         if (Input.GetKeyUp(KeyCode.E))
         {
-            transform.GetChild(0).gameObject.SetActive(false);
-            transform.GetChild(6).gameObject.SetActive(true);
             skill_ani_use = false;
             skill_time = 0.0f;
             if (b_magic && b_isground && !b_upside)
@@ -279,18 +277,14 @@ public class C_Player : MonoBehaviour {
                 transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);//轉向用
 
                 player_rig.velocity = new Vector2(-f_speed, player_rig.velocity.y); //速度等於speed
-                transform.GetChild(0).gameObject.SetActive(false);
-                transform.GetChild(6).gameObject.SetActive(true);
-                player_spine_animator2.SetBool("walk", true);  //動畫開關
+                player_spine_animator.SetBool("walk", true);  //動畫開關
 
             }
             else if (Input.GetKey(KeyCode.D))
             {
                 transform.localScale = new Vector3(1.0f, 1.0f, 1f);//轉向用
                 player_rig.velocity = new Vector2(f_speed, player_rig.velocity.y);
-                transform.GetChild(0).gameObject.SetActive(false);
-                transform.GetChild(6).gameObject.SetActive(true);
-                player_spine_animator2.SetBool("walk", true);
+                player_spine_animator.SetBool("walk", true);
             }
         }
 
@@ -300,24 +294,20 @@ public class C_Player : MonoBehaviour {
             {
                 transform.localScale = new Vector3(-1.0f, -1.0f, 1.0f);//轉向用
                 player_rig.velocity = new Vector2(-f_speed, player_rig.velocity.y);
-                transform.GetChild(0).gameObject.SetActive(false);
-                transform.GetChild(6).gameObject.SetActive(true);
-                player_spine_animator2.SetBool("walk", true);
+                player_spine_animator.SetBool("walk", true);
 
             }
             else if (Input.GetKey(KeyCode.D))
             {
                 transform.localScale = new Vector3(1.0f, -1.0f, 1.0f);//轉向用
                 player_rig.velocity = new Vector2(f_speed, player_rig.velocity.y);
-                transform.GetChild(0).gameObject.SetActive(false);
-                transform.GetChild(6).gameObject.SetActive(true);
-                player_spine_animator2.SetBool("walk", true);
+                player_spine_animator.SetBool("walk", true);
             }
         }
 
         if (!(Input.GetKey(KeyCode.D)) && (!Input.GetKey(KeyCode.A)))
         {
-            player_spine_animator2.SetBool("walk", false);
+            player_spine_animator.SetBool("walk", false);
         }
     }
 
@@ -337,8 +327,6 @@ public class C_Player : MonoBehaviour {
         if (shoot_ani_time==0 && (Input.GetMouseButtonDown(1) && f_shoot > 0.5f) || (Input.GetMouseButtonDown(1) && f_shoot == 0))//射子彈
         {
             shoot_ani_time = 0.01f;
-            transform.GetChild(0).gameObject.SetActive(true);
-            transform.GetChild(6).gameObject.SetActive(false);
             player_spine_animator.Play("shoot");
         }
         if(shoot_ani_time>0)shoot_ani_time += Time.deltaTime;
@@ -394,11 +382,18 @@ public class C_Player : MonoBehaviour {
         AOE_col.gameObject.SetActive(false);
     }
 
+    void JumpEndTime() {
+        f_jump_time += Time.deltaTime;
+        if (f_jump_time > 0.7f) {
+            b_jump_end = true;
+            f_jump_time = 0.0f;
+            player_spine_animator.SetBool("jump", false);
+        } 
+    }
+
     //受傷
     public void GetHurt(float hurt_dir)
     {
-        transform.GetChild(0).gameObject.SetActive(true);
-        transform.GetChild(6).gameObject.SetActive(false);
         player_spine_animator.Play("hit2");
         i_hp --;
         b_hurting = true;

@@ -170,7 +170,7 @@ public class C_CameraFollow : MonoBehaviour {
         {
             Vector3 back_player;
             //正向時
-            if (Mathf.Abs(target.transform.position.y + 3.5f - this.transform.position.y) > 0.1f && !playerclass.b_upside)
+            if (Mathf.Abs(target.transform.position.y + 2.7f - this.transform.position.y) > 0.1f && !playerclass.b_upside)
             {
                 //玩家與攝影機的向量差並單位化
                 back_player = (target.transform.position + new Vector3(0, 3.5f, 0) - this.transform.position).normalized;
