@@ -4292,7 +4292,7 @@ MonoBehaviour:
   calculateTangents: 0
   logErrors: 0
   disableRenderingOnOverride: 1
-  layerMixModes: 00000000
+  layerMixModes: 0000000000000000
   autoReset: 1
 --- !u!95 &1080823275
 Animator:
