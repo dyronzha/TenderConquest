@@ -32,6 +32,7 @@ using UnityEngine;
 using Spine;
 using Spine.Unity;
 
+
 namespace Spine.Unity.Examples {
 	public class Goblins : MonoBehaviour {
 		SkeletonAnimation skeletonAnimation;

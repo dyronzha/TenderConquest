@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Spine.Unity;
 
 public class C_Player : MonoBehaviour {
 
@@ -66,11 +67,9 @@ public class C_Player : MonoBehaviour {
     public bool b_die = false;
     private Vector3 respawn_position_vec3;
     private float f_dietime = 0;
-    
 
-
-    
-
+    SkeletonAnimator skeleton_animator;
+    SkeletonAnimation skeleton_animation;
     // Use this for initialization
     void Awake()
     {
@@ -99,6 +98,7 @@ public class C_Player : MonoBehaviour {
         b_AOE_has = false;
         b_hurting = false;
         f_hurting_time = 0;
+        skeleton_animator = transform.GetChild(0).GetComponent<SkeletonAnimator>();
     }
 
     void Start()
