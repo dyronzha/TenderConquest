@@ -4249,6 +4249,8 @@ GameObject:
   - component: {fileID: 1080823276}
   - component: {fileID: 1080823275}
   - component: {fileID: 1080823274}
+  - component: {fileID: 1080823279}
+  - component: {fileID: 1080823278}
   m_Layer: 0
   m_Name: Spine Mecanim GameObject (New SkeletonData)
   m_TagString: Untagged
@@ -4349,6 +4351,28 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1080823272}
   m_Mesh: {fileID: 0}
+--- !u!114 &1080823278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1080823272}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8953faadef4a47e40bbad4b7ed074f85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1080823279
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1080823272}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52f7a3b05b52df640918405a7e966dbf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1098775565
 GameObject:
   m_ObjectHideFlags: 0

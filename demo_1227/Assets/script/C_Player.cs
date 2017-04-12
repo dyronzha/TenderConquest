@@ -129,19 +129,23 @@ public class C_Player : MonoBehaviour {
 
     void Update()
     {
-        if (b_hurting) {
-            HurtTime();
-            return;
-        } 
-        AOE_skill();
-        TeleportToAni(); //上下瞬移
         //判斷在地上
         b_isground = (Physics2D.Linecast(transform.position, t_ground_check.position, 1 << LayerMask.NameToLayer("ground"))) ||
             (Physics2D.Linecast(transform.position, t_ground_check2.position, 1 << LayerMask.NameToLayer("ground")));
         player_spine_animator.SetBool("isground", b_isground);
+        
+        //受擊
+        if (b_hurting) {
+            HurtTime();
+            return;
+        } 
+      
 
         if (!b_die)  //沒死
         {
+            NormalHit();
+            AOE_skill(); //範圍技
+            TeleportToAni(); //上下瞬移
             if (Input.GetKey(KeyCode.W) && b_isground)//&& !b_magic
             {
                 b_jump = true;
@@ -156,6 +160,7 @@ public class C_Player : MonoBehaviour {
             if (f_shoot < 3) f_shoot += Time.deltaTime;
         }
         else PlayerRespawn();
+
         if (player_tra.localScale.x > 0)
         {
             direction = true;
@@ -331,6 +336,10 @@ public class C_Player : MonoBehaviour {
         }
         if(shoot_ani_time>0)shoot_ani_time += Time.deltaTime;
         if (shoot_ani_time > 0.7f) ShootAct(normalized,angle);
+    }
+
+    void NormalHit() {
+        if (Input.GetMouseButtonDown(0)) player_spine_animator.Play("attack1",1);
     }
 
     void ShootAct(Vector2 normalied, float angle)
