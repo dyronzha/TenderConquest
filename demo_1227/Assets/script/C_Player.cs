@@ -47,7 +47,8 @@ public class C_Player : MonoBehaviour {
     public string s_name = "player";
     public Transform player_tra;
     private bool b_hurting;
-    private float f_hurting_time,f_hurt_dir;
+    private float f_hurting_time,f_hurt_dir,f_attack_time;
+    private int i_hit_number;
     
 
     //玩家運動變數
@@ -97,8 +98,9 @@ public class C_Player : MonoBehaviour {
         AOE_col.gameObject.SetActive(false);
         b_AOE_has = false;
         b_hurting = false;
-        f_hurting_time = 0;
+        f_hurting_time = f_attack_time = 0;
         skeleton_animator = transform.GetChild(0).GetComponent<SkeletonAnimator>();
+        i_hit_number = 0;
     }
 
     void Start()
@@ -134,17 +136,16 @@ public class C_Player : MonoBehaviour {
             (Physics2D.Linecast(transform.position, t_ground_check2.position, 1 << LayerMask.NameToLayer("ground")));
         player_spine_animator.SetBool("isground", b_isground);
         
-        //受擊
-        if (b_hurting) {
-            HurtTime();
-            return;
-        } 
-      
-
         if (!b_die)  //沒死
         {
+            //受擊
+            if (b_hurting)
+            {
+                HurtTime();
+                return;
+            }
             NormalHit();
-            AOE_skill(); //範圍技
+            //AOE_skill(); //範圍技
             TeleportToAni(); //上下瞬移
             if (Input.GetKey(KeyCode.W) && b_isground)//&& !b_magic
             {
@@ -339,7 +340,20 @@ public class C_Player : MonoBehaviour {
     }
 
     void NormalHit() {
-        if (Input.GetMouseButtonDown(0)) player_spine_animator.Play("attack1",1);
+        f_attack_time += Time.deltaTime;
+        if (f_attack_time > 0.5f) i_hit_number = 0;
+        if (Input.GetMouseButtonDown(0)) {
+            if (i_hit_number < 1) {
+                player_spine_animator.Play("attack0", 1);
+                f_attack_time = 0;
+                i_hit_number++;
+            } 
+            else {
+                    player_spine_animator.Play("attack1", 1);
+                    i_hit_number = 0;
+            }
+           
+        } 
     }
 
     void ShootAct(Vector2 normalied, float angle)
@@ -409,6 +423,7 @@ public class C_Player : MonoBehaviour {
         f_hurt_dir = hurt_dir;
         Debug.Log("hurt");
         player_rig.velocity = new Vector2(-5.0f*hurt_dir,10.0f);
+        transform.localScale = new Vector3(hurt_dir,1.0f,1.0f);
     }
     //受擊傷害時間
     public void HurtTime() {
@@ -417,7 +432,7 @@ public class C_Player : MonoBehaviour {
         if (f_hurting_time > 0.5f) {
             b_hurting = false;
             f_hurting_time = 0.0f;
-            player_rig.velocity = Vector2.zero;
+            //player_rig.velocity = Vector2.zero;
         } 
         
     }
@@ -453,7 +468,6 @@ public class C_Player : MonoBehaviour {
 
     void OnTriggerEnter2D(Collider2D collider)
     {
-        Debug.Log("gg");
         if (collider.tag == "hp_props")
         {
             i_hp++;

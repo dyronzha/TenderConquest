@@ -52,7 +52,7 @@ public class C_EnemyBase : MonoBehaviour {
         f_distance = Mathf.Abs(transform.position.x - respawn_location_vec3.x) ;
         if (f_distance >f_trace_dis) b_toofar = true;
         else b_toofar = false;
-        if (b_attack && !Wait(ref f_atk_blank, 1.0f)) return true;
+        if (b_attack && !Wait(ref f_atk_blank, 1.35f)) return true;
         else {
             f_atk_blank = 0;
             b_attack = false;
@@ -68,6 +68,7 @@ public class C_EnemyBase : MonoBehaviour {
                 {
                     enemy_body.velocity = new Vector3(0, 0, 0);
                     enemy_animator.Play("EnemyAttack");
+                    b_attack = true;
                     return (true);
                 }
                 enemy_body.velocity = new Vector3(walkto_vec3.normalized.x * f_speed*1.4f, enemy_body.velocity.y,0);
@@ -130,7 +131,7 @@ public class C_EnemyBase : MonoBehaviour {
                     b_to_right = false;
                 }
                 else {
-                    f_ramble_wait = 00f;
+                    f_ramble_wait = 0.0f;
                     if (b_to_right) {
                         walkto_vec3 = new Vector3(1, 0, 0);
                     }
@@ -145,10 +146,10 @@ public class C_EnemyBase : MonoBehaviour {
         if ( f_current_time < f_total_time)
         {
             f_current_time += Time.deltaTime;
+            //Debug.Log("wait" + f_current_time);
             return false;
         }
         else {
-            Debug.Log("done" + f_current_time);
             return true;
         } 
         
@@ -157,6 +158,10 @@ public class C_EnemyBase : MonoBehaviour {
     public void Attackarea(){
         hit_area.enabled = true;
         b_attack = true;
+    }
+
+    void AttackOver() {
+        hit_area.enabled = false;
     }
 
     public void GetHurt() {
@@ -179,7 +184,6 @@ public class C_EnemyBase : MonoBehaviour {
         Debug.Log("hit");
         if (collision.tag == "Player" && b_attack)
         {
-            Debug.Log("success");
             hit_area.enabled = false;
             collision.gameObject.SendMessage("GetHurt",transform.localScale.x);
         }
@@ -187,7 +191,7 @@ public class C_EnemyBase : MonoBehaviour {
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-
+        
     }
 
     private void OnTriggerExit2D(Collider2D collision)
