@@ -15,5 +15,6 @@ public class C_PlayerAniEvent : MonoBehaviour {
 	}
     void StickHit() {
         Debug.Log("normal hit");
+        transform.parent.SendMessage("NormalHitOver");
     }
 }

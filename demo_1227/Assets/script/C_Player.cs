@@ -46,7 +46,7 @@ public class C_Player : MonoBehaviour {
     protected C_UIHP HP_ui;
     public string s_name = "player";
     public Transform player_tra;
-    private bool b_hurting;
+    private bool b_hurting,b_attack_enable,b_play_ani;
     private float f_hurting_time,f_hurt_dir,f_attack_time;
     private int i_hit_number;
     
@@ -97,7 +97,8 @@ public class C_Player : MonoBehaviour {
         AOE_col = transform.GetChild(3);
         AOE_col.gameObject.SetActive(false);
         b_AOE_has = false;
-        b_hurting = false;
+        b_hurting = b_play_ani =  false;
+        b_attack_enable = true;
         f_hurting_time = f_attack_time = 0;
         skeleton_animator = transform.GetChild(0).GetComponent<SkeletonAnimator>();
         i_hit_number = 0;
@@ -340,20 +341,36 @@ public class C_Player : MonoBehaviour {
     }
 
     void NormalHit() {
-        f_attack_time += Time.deltaTime;
-        if (f_attack_time > 0.5f) i_hit_number = 0;
+       f_attack_time += Time.deltaTime;
+        if (f_attack_time > 0.5f) {
+            i_hit_number = 0;
+            b_attack_enable = true;
+        } 
         if (Input.GetMouseButtonDown(0)) {
-            if (i_hit_number < 1) {
+            if(f_attack_time >0.07f) b_play_ani = true;
+        }
+        if (b_attack_enable && b_play_ani)
+        {
+            if (i_hit_number < 1)
+            {
                 player_spine_animator.Play("attack0", 1);
                 f_attack_time = 0;
                 i_hit_number++;
-            } 
-            else {
-                    player_spine_animator.Play("attack1", 1);
-                    i_hit_number = 0;
+                b_attack_enable = false;
+                b_play_ani = false;
             }
-           
-        } 
+            else
+            {
+                f_attack_time = 0;
+                player_spine_animator.Play("attack1", 1);
+                i_hit_number = 0;
+                b_attack_enable = false;
+                b_play_ani = false;
+            }
+        }
+    }
+    public void NormalHitOver() {
+        b_attack_enable = true;
     }
 
     void ShootAct(Vector2 normalied, float angle)
