@@ -41,12 +41,14 @@ public class C_SceneManager : MonoBehaviour {
     }
 
     void OnDetect() {
+        O_camera.SendMessage("SetScreen", new Vector3(88.0f, 19.0f, -10.0f));
+        this.Invoke("step_enemy", 3.0f);
         if (i_save_point == 2)
         {
            
         }
         else if (i_save_point == 3) {
-            O_camera.SendMessage("SetScreen", new Vector3(81.8f,17.5f,-10.0f));
+            O_camera.SendMessage("SetScreen", new Vector3(88.0f,19.0f,-10.0f));
             this.Invoke("step_enemy", 3.0f);
         }
         
@@ -54,7 +56,7 @@ public class C_SceneManager : MonoBehaviour {
 
     void step_enemy() {
         O_step_enemy.SendMessage("change",new Vector3(82.3f,12.9f,0.5f));
-        O_step_ice.SendMessage("change", new Vector3(80.0f,13.0f,0.5f));
+        //O_step_ice.SendMessage("change", new Vector3(80.0f,13.0f,0.5f));
         O_camera.GetComponent<C_CameraFollow>().Invoke("reset",1.0f);
     }
 
