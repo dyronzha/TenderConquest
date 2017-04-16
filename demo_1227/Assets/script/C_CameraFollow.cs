@@ -28,7 +28,7 @@ public class C_CameraFollow : MonoBehaviour {
         left_border = this.gameObject.transform.GetChild(1);
         right_limit = this.gameObject.transform.GetChild(2);
         left_limit = this.gameObject.transform.GetChild(3);
-        range_x = new Vector3(20.4f, 80.5f, 0.0f);
+        range_x = new Vector3(20.4f, 89.0f, 0.0f);
         range_y = new Vector3(16.0f, 27.0f, 0.0f);
         playerclass = target.GetComponent<C_Player>();
         sp = target.transform.GetChild(2).GetComponent<SpriteRenderer>();

@@ -53,8 +53,8 @@ public class C_Player : MonoBehaviour {
 
     //玩家運動變數
     private float f_speed = 0.0f;
-    private bool b_jump,b_jump_end = false;
-    private float f_jump_speed, f_jump_time = 0.0f;
+    private bool b_jump = false;
+    private float f_jump_speed = 0.0f;
     Vector3 last_position_vec3;
     Vector2 jump_vec2;
     public Vector3 between_cilling_vec3;
@@ -89,7 +89,7 @@ public class C_Player : MonoBehaviour {
         jump_vec2 = new Vector2(0, f_jump_speed);
         player_coll = GetComponent<Collider2D>();
         respawn_position_vec3 = transform.position;
-        b_jump = true;
+        b_jump = false;
         i_hp = 3;i_hp_tmp = 3;
         HP_ui = GameObject.Find("UI_HP").GetComponent<C_UIHP>();
         player_box = gameObject.GetComponent<BoxCollider2D>();
@@ -136,7 +136,7 @@ public class C_Player : MonoBehaviour {
         b_isground = (Physics2D.Linecast(transform.position, t_ground_check.position, 1 << LayerMask.NameToLayer("ground"))) ||
             (Physics2D.Linecast(transform.position, t_ground_check2.position, 1 << LayerMask.NameToLayer("ground")));
         player_spine_animator.SetBool("isground", b_isground);
-        
+
         if (!b_die)  //沒死
         {
             //受擊
@@ -151,11 +151,10 @@ public class C_Player : MonoBehaviour {
             if (Input.GetKey(KeyCode.W) && b_isground)//&& !b_magic
             {
                 b_jump = true;
-                b_jump_end = false;
                 player_spine_animator.SetBool("jump", b_jump);
                 JumpAct();
             }
-            if (!b_jump_end) JumpEndTime();
+            JumpChange();
             //射擊
             ShootAni();
             //射擊間格時間
@@ -262,14 +261,38 @@ public class C_Player : MonoBehaviour {
         {
             player_rig.velocity = new Vector2(player_rig.velocity.x, f_jump_speed);
             b_jump = false;
+            player_spine_animator.SetBool("jumpover", false);
         }
         else if (b_upside && b_jump)
         {
             player_rig.velocity = new Vector2(player_rig.velocity.x, -f_jump_speed);
             b_jump = false;
+            player_spine_animator.SetBool("jumpover", false);
         }
     }
-    
+    void JumpChange()
+    {
+        if (!b_upside)
+        {
+            if (player_rig.velocity.y <= 0) player_spine_animator.SetBool("jumpchange",true);
+        }
+        else {
+            if (player_rig.velocity.y >= 0) player_spine_animator.SetBool("jumpchange", true);
+        }
+    }
+    void JumpEnd()
+    {
+        Debug.Log("jumpOver1" + b_jump);
+        if (!b_isground) return;
+        player_spine_animator.SetBool("isground", b_isground);
+        player_spine_animator.SetBool("jumpchange", false);
+        if (Input.GetKey(KeyCode.W)) b_jump = true;
+        else b_jump = false;
+        player_spine_animator.SetBool("jump", b_jump);
+        player_spine_animator.SetBool("jumpover", true);
+        Debug.Log("jumpOver2" + b_jump);
+    }
+
     //移動
     void Move()
     {
@@ -314,7 +337,12 @@ public class C_Player : MonoBehaviour {
 
         if (!(Input.GetKey(KeyCode.D)) && (!Input.GetKey(KeyCode.A)))
         {
+            float temp = player_rig.velocity.x;
+            if (temp > 0) temp -= Time.deltaTime*0.5f;
+            else temp = 0.0f;
+            player_rig.velocity = new Vector2(temp, player_rig.velocity.y);
             player_spine_animator.SetBool("walk", false);
+            Debug.Log(player_rig.velocity + " " + temp);
         }
     }
 
@@ -422,14 +450,8 @@ public class C_Player : MonoBehaviour {
         AOE_col.gameObject.SetActive(false);
     }
 
-    void JumpEndTime() {
-        f_jump_time += Time.deltaTime;
-        if (f_jump_time > 0.7f) {
-            b_jump_end = true;
-            f_jump_time = 0.0f;
-            player_spine_animator.SetBool("jump", false);
-        } 
-    }
+   
+
 
     //受傷
     public void GetHurt(float hurt_dir)

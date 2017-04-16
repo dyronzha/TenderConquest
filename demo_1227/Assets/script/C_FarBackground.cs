@@ -11,7 +11,7 @@ public class C_FarBackground : MonoBehaviour {
     // Use this for initialization
     void Awake () {
         player = GameObject.Find("Player");
-        limit_l = 15.5f; limit_r = 34.5f; player_l = 14.5f; player_r = 36.5f;
+        limit_l = -4.6f; limit_r = 38.5f; player_l = 14.5f; player_r = 94.0f;
         limit_t = 16.5f; limit_b = 13.5f; player_t = 22.65f; player_b = 18.5f;
         trans_value = (limit_r - limit_l)/(player_r - player_l);
         bk_f_x = limit_l;

@@ -41,7 +41,7 @@ public class C_SceneManager : MonoBehaviour {
     }
 
     void OnDetect() {
-        O_camera.SendMessage("SetScreen", new Vector3(88.0f, 19.0f, -10.0f));
+        O_camera.SendMessage("SetScreen", new Vector3(89.0f, 16.0f, -10.0f));
         this.Invoke("step_enemy", 3.0f);
         if (i_save_point == 2)
         {

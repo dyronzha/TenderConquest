@@ -17,4 +17,7 @@ public class C_PlayerAniEvent : MonoBehaviour {
         Debug.Log("normal hit");
         transform.parent.SendMessage("NormalHitOver");
     }
+    void JumpOver() {
+        transform.parent.SendMessage("JumpEnd");
+    }
 }
