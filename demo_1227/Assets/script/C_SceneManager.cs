@@ -6,7 +6,7 @@ public class C_SceneManager : MonoBehaviour {
 
     public static C_SceneManager SceneManger;
     public int i_save_point;
-    public GameObject  O_show_plate08, O_show_plate08_2,O_enemy,O_plate10, O_show_plate11,O_record3,O_step_ice,O_step_enemy;
+    public GameObject  O_show_plate21, O_enemy,O_plate10, O_show_plate11,O_record3,O_step_ice,O_step_enemy,O_barrier;
     GameObject O_camera;
     bool b_enemy_switch;
 
@@ -22,7 +22,7 @@ public class C_SceneManager : MonoBehaviour {
 	void Update () {
         if (O_enemy == null&&!b_enemy_switch) {
             O_plate10.SetActive(true);
-            O_show_plate08.SetActive(true);
+            O_show_plate21.SetActive(true);
             O_show_plate11.SetActive(true);
             O_record3.SetActive(true);
             b_enemy_switch = true;
@@ -33,7 +33,7 @@ public class C_SceneManager : MonoBehaviour {
         i_save_point++;
         if (i_save_point == 2)
         {
-            Destroy(GameObject.Find("barrier"));
+            Destroy(O_barrier);
         }
         else if (i_save_point == 3) {
            
