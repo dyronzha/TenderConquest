@@ -45,14 +45,16 @@ public class C_EnemyBase : MonoBehaviour {
     //追逐視野內玩家
     bool seePlay()
     {
+        //碰到玩家的raycast
         if (!b_see_it) b_see_it = ray_seeplayer = Physics2D.Raycast(transform.position, (new Vector3(-1 * transform.localScale.x, 0, 0) + transform.up * 0.3f),f_sight_dis, mask);
         Debug.DrawLine(transform.position, transform.position + (new Vector3(-1 * transform.localScale.x, 0, 0) + transform.up*0.3f).normalized * f_sight_dis);
         Vector3 walkto_vec3;
+        //判斷有無碰到地板
         ray_detect = Physics2D.Linecast(transform.position, t_detect.transform.position, 1 << LayerMask.NameToLayer("ground"));
         f_distance = Mathf.Abs(transform.position.x - respawn_location_vec3.x) ;
         if (f_distance >f_trace_dis) b_toofar = true;
         else b_toofar = false;
-        if (b_attack && !Wait(ref f_atk_blank, 1.35f)) return true;
+        if (b_attack && !Wait(ref f_atk_blank, 2.0f)) return true;
         else {
             f_atk_blank = 0;
             b_attack = false;

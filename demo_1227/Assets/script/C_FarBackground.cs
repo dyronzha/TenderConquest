@@ -6,13 +6,16 @@ public class C_FarBackground : MonoBehaviour {
 
     float bk_f_x,bk_f_y;
     GameObject camera;
-    float limit_r, limit_l, camera_r, camera_l, trans_value;
-    float limit_t, limit_b, camera_t, camera_b, trans_value_y;
+    public float limit_r, limit_l, limit_t, limit_b;
+    float camera_r, camera_l, trans_value;
+    float  camera_t, camera_b, trans_value_y;
     // Use this for initialization
     void Awake () {
         camera = GameObject.Find("Main Camera");
-        limit_l = 37.4f; limit_r = 64.5f; camera_l = 20.4f; camera_r = 89.0f;
-        limit_t = 25.2f; limit_b = 17.6f; camera_t = 27.0f; camera_b = 16.0f;
+        //limit_l = 37.4f; limit_r = 64.5f;
+        camera_l = 20.4f; camera_r = 89.0f;
+        //limit_t = 25.2f; limit_b = 17.6f;
+        camera_t = 27.0f; camera_b = 16.0f;
         trans_value = (limit_r - limit_l)/(camera_r - camera_l);
         bk_f_x = limit_l;
         bk_f_y = limit_b;

@@ -18,6 +18,6 @@ public class C_PlayerAniEvent : MonoBehaviour {
         transform.parent.SendMessage("NormalHitOver");
     }
     void JumpOver() {
-        transform.parent.SendMessage("JumpEnd");
+        //transform.parent.SendMessage("JumpEnd");
     }
 }

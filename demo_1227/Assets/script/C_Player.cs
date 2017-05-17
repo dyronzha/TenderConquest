@@ -20,7 +20,7 @@ public class C_Player : MonoBehaviour {
     public bool b_upside = false;
     public bool b_use_skill = false;
     public float f_shoot = 0f;
-    GameObject O_tempmirror;
+    //GameObject O_tempmirror;
     GameObject O_tempvirtuall;
     float skill_time = 0.0f;
     bool skill_ani_use = false;
@@ -148,6 +148,7 @@ public class C_Player : MonoBehaviour {
             NormalHit();
             //AOE_skill(); //範圍技
             TeleportToAni(); //上下瞬移
+            JumpDetect();
             if (Input.GetKey(KeyCode.W) && b_isground)//&& !b_magic
             {
                 b_jump = true;
@@ -229,7 +230,7 @@ public class C_Player : MonoBehaviour {
         }
         if ((!hit_cilling_ray || !hit_ground_ray) && b_magic)
         {
-            Destroy(O_tempmirror, 0f);
+            //Destroy(O_tempmirror, 0f);
             Destroy(O_tempvirtuall, 0f);
             b_magic = false;
         }
@@ -241,14 +242,14 @@ public class C_Player : MonoBehaviour {
            // //按鍵後產生鏡子和虛像，並紀錄用過技能
            if ( !b_magic && b_isground&& !b_upside)
           {
-                O_tempmirror = Instantiate(O_mirror, between_cilling_vec3, Quaternion.identity) as GameObject;
+               // O_tempmirror = Instantiate(O_mirror, between_cilling_vec3, Quaternion.identity) as GameObject;
                 O_tempvirtuall = Instantiate(O_virtualplayer, between_virtuall_vec3, Quaternion.Euler(180, 0, 0)) as GameObject;
                 b_magic = true;
             }
 
             if ( !b_magic && b_isground&& b_upside)
             {
-                O_tempmirror = Instantiate(O_mirror, between_cilling_vec3, Quaternion.identity) as GameObject;
+               // O_tempmirror = Instantiate(O_mirror, between_cilling_vec3, Quaternion.identity) as GameObject;
                 O_tempvirtuall = Instantiate(O_virtualplayer, between_virtuall_vec3, Quaternion.identity) as GameObject;
                 b_magic = true;
             }
@@ -280,17 +281,21 @@ public class C_Player : MonoBehaviour {
             if (player_rig.velocity.y >= 0) player_spine_animator.SetBool("jumpchange", true);
         }
     }
-    void JumpEnd()
+    void JumpDetect()
     {
-        Debug.Log("jumpOver1" + b_jump);
-        if (!b_isground) return;
-        player_spine_animator.SetBool("isground", b_isground);
-        player_spine_animator.SetBool("jumpchange", false);
-        if (Input.GetKey(KeyCode.W)) b_jump = true;
-        else b_jump = false;
-        player_spine_animator.SetBool("jump", b_jump);
-        player_spine_animator.SetBool("jumpover", true);
-        Debug.Log("jumpOver2" + b_jump);
+        if (b_isground) {
+            b_jump = false;
+            player_spine_animator.SetBool("jump",b_jump);
+        }
+        //Debug.Log("jumpOver1" + b_jump);
+        //if (!b_isground) return;
+        //player_spine_animator.SetBool("isground", b_isground);
+        //player_spine_animator.SetBool("jumpchange", false);
+        //if (Input.GetKey(KeyCode.W)) b_jump = true;
+        //else b_jump = false;
+        //player_spine_animator.SetBool("jump", b_jump);
+        //player_spine_animator.SetBool("jumpover", true);
+        //Debug.Log("jumpOver2" + b_jump);
     }
 
     //移動
@@ -342,7 +347,7 @@ public class C_Player : MonoBehaviour {
             else temp = 0.0f;
             player_rig.velocity = new Vector2(temp, player_rig.velocity.y);
             player_spine_animator.SetBool("walk", false);
-            Debug.Log(player_rig.velocity + " " + temp);
+           // Debug.Log(player_rig.velocity + " " + temp);
         }
     }
 

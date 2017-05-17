@@ -4,7 +4,7 @@ using System.Collections;
 public class C_CameraFollow : MonoBehaviour {
     //視窗內人物移動邊界變數
     private Transform right_border, left_border, right_limit, left_limit = null;
-    private float BtwTop, BtwBottom, btwfront, btwback;
+    private float BtwTop, BtwBottom, btwfront, btwback, f_trans_time;
     private bool TouchTop, TouchDown, y_axis_change,_b_right,_b_left,_b_camera_fixed;
 
     //攝影機移動範圍
@@ -15,7 +15,7 @@ public class C_CameraFollow : MonoBehaviour {
     SpriteRenderer sp;
     private C_Player playerclass;
     private Vector3 playertop, playerbottom, FixedPosition, tele_move_vec3;
-    bool b_static;
+    bool b_static, b_start_reset;
     Vector3 static_fixed,final_pos; //固定螢幕時讓攝影機慢慢到目的地的變數
 
 
@@ -42,7 +42,7 @@ public class C_CameraFollow : MonoBehaviour {
         btwback = transform.position.x - left_border.position.x;
         TouchTop = TouchDown = y_axis_change = true;
         _b_left = _b_right  = _b_camera_fixed= false;
-        b_static = false;
+        b_static = b_start_reset = false;
     }
 
     // Update is called once per frame
@@ -65,7 +65,16 @@ public class C_CameraFollow : MonoBehaviour {
             if (!Input.GetKey(KeyCode.Q)) FollowPlayer2();
         }
         else {
-            if (Vector3.Distance(final_pos, transform.position) > 1.0f) transform.position += static_fixed;
+            if (b_start_reset) {
+                reset();
+                return;
+            } 
+            if (Vector3.Distance(final_pos, transform.position) > 1.0f) transform.position += static_fixed * Time.deltaTime * 15.0f;
+            else {
+                static_fixed = (new Vector3(target.position.x,target.position.y+3.5f,0) - transform.position).normalized;
+                this.Invoke("ChMod", f_trans_time);
+                Debug.Log(f_trans_time);
+            }
         }
       
         //限制視窗可移動範圍
@@ -73,17 +82,29 @@ public class C_CameraFollow : MonoBehaviour {
     }
 
     //固定螢幕在特定位置
-    void SetScreen(Vector3 pos) {
+    public void SetScreen(Vector3 pos, float temp_time) {
         b_static = true;
         final_pos = pos;
-        static_fixed = (pos - transform.position).normalized*0.3f;
+        static_fixed = (pos - transform.position).normalized;
+        f_trans_time = temp_time;
     }
 
     //RESET
     void reset()
     {
-        b_static = false;
-        transform.position = new Vector3(playerbottom.x + btwback, transform.position.y, transform.position.z);
+        if (Vector3.Distance(new Vector3(target.position.x, target.position.y + 3.5f, 0.0f), transform.position) > 1.0f)
+        {
+            transform.position += static_fixed * Time.deltaTime * 15.0f;
+        }
+        else {
+            b_static = false;
+            b_start_reset = false;
+        } 
+        
+        //transform.position = new Vector3(target.position.x, target.position.y, transform.position.z);
+    }
+    void ChMod() {
+        b_start_reset = true;
     }
     //Q鍵瞬移完的校正
     void AfTele() {
